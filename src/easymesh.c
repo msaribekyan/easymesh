@@ -6,8 +6,8 @@
 #include "easymesh.h"
 
 /* SETUP VARIABLES BEGIN*/
-uint8_t node_address = 3;
-uint8_t common_channel = 50;
+uint8_t node_address = 0;
+uint8_t common_channel = 0;
 
 uint8_t RxAddress[] = {0x00,0xDD,0xCC,0xBB,0xAA};
 uint8_t TxAddress[] = {0xEE,0xDD,0xCC,0xBB,0xAA};
@@ -17,7 +17,9 @@ nrf_mode_t current_mode = __MODE_RX;
 uint8_t seq_id = 0;
 uint8_t members[255] = {255}; //Store the last received Sequence ID of that node
 
-uint8_t easymesh_init(){
+uint8_t easymesh_init(uint8_t channel, uint8_t address){
+	common_channel = channel;
+	node_address = address;
 	NRF24_Init();
 	NRF24_TxMode(TxAddress, common_channel);
 	HAL_Delay(10);
@@ -147,6 +149,9 @@ uint8_t nrf_transmit_queue(){
 }
 
 uint8_t while_true_func(){
+	if(node_address == 0){
+		return 1; // Not configured
+	}
 	if (isDataAvailable(2) == 1){
 		HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, SET);
 		nrf_frame_t frame;
@@ -160,8 +165,8 @@ uint8_t while_true_func(){
 				}
 				retransmit_frame(frame);
 			}
-			members[frame.data[2]] = frame.data[3]; // Set last received Seq_id
 		}
+		members[frame.data[2]] = frame.data[3]; // Set last received Seq_id
 		HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, RESET);
 	}else if(nrf_tx_queue_head != NULL){
 		HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, SET);
