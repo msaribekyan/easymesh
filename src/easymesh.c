@@ -13,6 +13,20 @@ uint8_t RxAddress[] = {0x00,0xDD,0xCC,0xBB,0xAA};
 uint8_t TxAddress[] = {0xEE,0xDD,0xCC,0xBB,0xAA};
 /* SETUP VARIABLES END*/
 
+typedef enum{
+	__MODE_RX,
+	__MODE_TX,
+}nrf_mode_t;
+
+typedef struct{
+	uint8_t data[32];
+}nrf_frame_t;
+
+typedef struct nrf_tx_queue_node_t{
+	nrf_frame_t frame;
+	struct nrf_tx_queue_node_t* next;
+}nrf_tx_queue_node_t;
+
 nrf_mode_t current_mode = __MODE_RX;
 uint8_t seq_id = 0;
 uint8_t members[255] = {255}; //Store the last received Sequence ID of that node
